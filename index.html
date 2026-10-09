@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clofovoz AI — Síntesis Vocal & Procesamiento Neuronal de Audio</title>
+  <meta name="description" content="Plataforma de inteligencia artificial para síntesis de voz hiperrealista, doblaje neuronal en tiempo real y bioacústica clínica. Clofovoz AI.">
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              400: '#38bdf8',
+              500: '#0284c7',
+              600: '#0369a1',
+              neon: '#06b6d4',
+              violet: '#8b5cf6',
+              accent: '#10b981'
+            },
+            dark: {
+              900: '#06080F',
+              800: '#0B0F19',
+              700: '#111827',
+              600: '#1F2937'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-8px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom glassmorphism utilities & glow accents */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.2);
+      transform: translateY(-2px);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 40px -10px rgba(6, 182, 212, 0.35);
+    }
+    /* Waveform visualizer bar animation */
+    .eq-bar {
+      transition: height 0.08s ease-in-out, background-color 0.2s ease;
+    }
+    /* Hide scrollbar on preview chips */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#05070D] text-slate-100 antialiased font-sans selection:bg-cyan-500 selection:text-white min-h-screen overflow-x-hidden relative">
+
+  <!-- Ambient background glow spots -->
+  <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-cyan-600/15 blur-[120px] pointer-events-none -z-10 animate-pulse-glow"></div>
+  <div class="fixed top-[40%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[140px] pointer-events-none -z-10 animate-pulse-glow" style="animation-delay: 2s;"></div>
+  <div class="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- Main Navigation -->
+  <header class="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[1px] shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-200">
+          <div class="w-full h-full bg-[#070b14] rounded-xl flex items-center justify-center">
+            <i data-lucide="audio-lines" class="w-5 h-5 text-cyan-400 group-hover:rotate-12 transition-transform"></i>
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xl font-bold tracking-tight text-white">CLOFOVOZ</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono font-semibold border border-cyan-500/30">AI</span>
+          </div>
+          <span class="text-[10px] text-slate-400 tracking-wider font-mono -mt-1 uppercase">Neural Audio Engine</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#tecnologia" class="hover:text-cyan-400 transition-colors">Tecnología</a>
+        <a href="#demo" class="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+          <span>Laboratorio</span>
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        </a>
+        <a href="#capacidades" class="hover:text-cyan-400 transition-colors">Capacidades</a>
+        <a href="#planes" class="hover:text-cyan-400 transition-colors">Modelos & API</a>
+      </nav>
+
+      <!-- CTA & Status -->
+      <div class="flex items-center gap-3">
+        <button onclick="openModal()" class="relative group overflow-hidden rounded-xl p-[1px] font-semibold text-sm">
+          <span class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-indigo-600 group-hover:from-cyan-400 group-hover:to-indigo-500 transition-all"></span>
+          <span class="relative block px-5 py-2.5 rounded-[11px] bg-[#090d16] group-hover:bg-opacity-80 transition text-white flex items-center gap-2">
+            <span>Acceso Anticipado</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform"></i>
+          </span>
+        </button>
+
+        <!-- Mobile menu toggler -->
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg text-slate-400 hover:text-white glass-panel" aria-label="Abrir menú">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown -->
+    <div id="mobileMenu" class="hidden md:hidden px-4 pt-3 pb-6 border-t border-slate-800 bg-[#070b14]/95 backdrop-blur-xl">
+      <div class="flex flex-col gap-4 text-sm font-medium text-slate-300">
+        <a href="#tecnologia" class="hover:text-cyan-400 py-1" onclick="toggleMobileMenu()">Tecnología</a>
+        <a href="#demo" class="hover:text-cyan-400 py-1" onclick="toggleMobileMenu()">Laboratorio Interactivo</a>
+        <a href="#capacidades" class="hover:text-cyan-400 py-1" onclick="toggleMobileMenu()">Capacidades</a>
+        <a href="#planes" class="hover:text-cyan-400 py-1" onclick="toggleMobileMenu()">Planes y Precios</a>
+        <button onclick="openModal(); toggleMobileMenu();" class="w-full text-center py-3 rounded-lg bg-cyan-500 text-slate-950 font-bold mt-2">
+          Solicitar API Key
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-16 pb-20 md:pt-28 md:pb-32 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-4xl mx-auto space-y-6">
+        
+        <!-- Status Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-panel border border-cyan-500/30 text-xs font-mono text-cyan-300 animate-float">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>CLOFOVOZ ENGINE v4.2 • REDES LATENTES 48kHz ULTRA-HD</span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1]">
+          La siguiente frontera de la <br/>
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
+            Síntesis Vocal Neuronal
+          </span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-base sm:text-xl text-slate-300 font-normal max-w-2xl mx-auto leading-relaxed">
+          Clofovoz AI transforma texto y articulaciones biométricas en audio fotorrealista con modulación emocional, doblaje neural sin latencia y calibración acústica de precisión.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 pt-4">
+          <a href="#demo" class="px-7 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm tracking-wide transition shadow-lg shadow-cyan-500/25 flex items-center gap-2">
+            <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
+            <span>Probar Simulador</span>
+          </a>
+          <button onclick="openModal()" class="px-7 py-3.5 rounded-xl glass-panel hover:bg-slate-800/80 text-white font-medium text-sm transition border border-slate-700/80 flex items-center gap-2">
+            <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+            <span>Documentación de la API</span>
+          </button>
+        </div>
+
+        <!-- Live Metrics Bar -->
+        <div class="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+          <div class="p-3 rounded-lg glass-panel text-left">
+            <div class="text-xl md:text-2xl font-bold font-mono text-white">&lt; 42ms</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Latencia de Inferencia</div>
+          </div>
+          <div class="p-3 rounded-lg glass-panel text-left">
+            <div class="text-xl md:text-2xl font-bold font-mono text-cyan-400">48 kHz</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Fidelidad de Audio</div>
+          </div>
+          <div class="p-3 rounded-lg glass-panel text-left">
+            <div class="text-xl md:text-2xl font-bold font-mono text-indigo-400">32+</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Idiomas & Fonemas</div>
+          </div>
+          <div class="p-3 rounded-lg glass-panel text-left">
+            <div class="text-xl md:text-2xl font-bold font-mono text-emerald-400">99.98%</div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider">Similitud Timbre</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Hero Audio Waveform Canvas -->
+      <div class="mt-14 relative max-w-5xl mx-auto rounded-2xl glass-panel p-4 md:p-6 border border-slate-700/50 glow-cyan">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 text-xs font-mono text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+            <span class="text-slate-200">OSCILOSCOPIO NEURONAL EN DIRECTO</span>
+          </div>
+          <span class="hidden sm:inline-block">DSP: ClofoVoz Spatial Tensor Array</span>
+        </div>
+        
+        <div class="w-full h-36 md:h-52 relative overflow-hidden rounded-xl bg-[#03060C] mt-3">
+          <canvas id="heroCanvas" class="w-full h-full block"></canvas>
+          <div class="absolute bottom-3 left-4 text-[11px] font-mono text-cyan-400/80 bg-black/60 px-2 py-1 rounded backdrop-blur border border-cyan-500/20">
+            Hz: 48000 | Canales: Stereo Latent | Dynamic Range: +114dB
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Audio Simulator -->
+  <section id="demo" class="py-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <h2 class="text-xs uppercase font-mono tracking-widest text-cyan-400 font-semibold mb-2">Simulador en Tiempo Real</h2>
+        <h3 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Experimenta la Síntesis Clofovoz</h3>
+        <p class="text-slate-400 text-sm md:text-base mt-2">
+          Escribe una frase, selecciona el perfil neural y reproduce la muestra con nuestro motor acústico simulado.
+        </p>
+      </div>
+
+      <!-- Simulator Main Deck -->
+      <div class="max-w-4xl mx-auto glass-panel rounded-2xl border border-slate-700/70 p-6 md:p-8 relative">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Left: Input & Preset Selection -->
+          <div class="lg:col-span-7 space-y-6">
+            <!-- Voice selection tabs -->
+            <div>
+              <label class="block text-xs font-mono uppercase text-slate-400 tracking-wider mb-2">
+                Perfil de Voz Neuronal
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="selectVoice('clofo-core', this)" class="voice-btn active p-3 rounded-xl border border-cyan-500 bg-cyan-950/40 text-left transition hover:border-cyan-400">
+                  <div class="text-xs font-bold text-white">ClofoVoz Core</div>
+                  <div class="text-[10px] text-cyan-300 font-mono">Barítono / Neutro</div>
+                </button>
+                <button type="button" onclick="selectVoice('nova-neural', this)" class="voice-btn p-3 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition hover:border-slate-700">
+                  <div class="text-xs font-bold text-white">Nova Neural</div>
+                  <div class="text-[10px] text-slate-400 font-mono">Soprano / Cálido</div>
+                </button>
+                <button type="button" onclick="selectVoice('echo-studio', this)" class="voice-btn p-3 rounded-xl border border-slate-800 bg-slate-900/60 text-left transition hover:border-slate-700">
+                  <div class="text-xs font-bold text-white">Echo Studio</div>
+                  <div class="text-[10px] text-slate-400 font-mono">Broadcast / Grave</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Text Prompt Area -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-xs font-mono uppercase text-slate-400 tracking-wider">Texto para Síntesis Fonética</label>
+                <button onclick="setRandomPrompt()" class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+                  <i data-lucide="refresh-cw" class="w-3 h-3"></i> Ejemplo
+                </button>
+              </div>
+              <textarea id="demoText" rows="4" class="w-full bg-[#03060C] border border-slate-800 rounded-xl p-4 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition resize-none font-sans" placeholder="Escribe el texto que deseas procesar con Clofovoz AI...">Bienvenido a Clofovoz AI. Nuestra arquitectura neuronal recrea la inflexión emotiva y la microdinámica de la voz humana en menos de cuarenta milisegundos.</textarea>
+            </div>
+
+            <!-- Fine Tuning Sliders -->
+            <div class="grid grid-cols-2 gap-4 pt-2">
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-mono">
+                  <span class="text-slate-400">Tono (Pitch)</span>
+                  <span id="pitchVal" class="text-cyan-400">1.0x</span>
+                </div>
+                <input id="pitchSlider" type="range" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updatePitch(this.value)" class="w-full accent-cyan-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-mono">
+                  <span class="text-slate-400">Velocidad (Rate)</span>
+                  <span id="speedVal" class="text-cyan-400">1.0x</span>
+                </div>
+                <input id="speedSlider" type="range" min="0.6" max="1.6" step="0.1" value="1.0" oninput="updateSpeed(this.value)" class="w-full accent-cyan-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Visualizer & Playback Control -->
+          <div class="lg:col-span-5 flex flex-col justify-between bg-[#040812] border border-slate-800/90 rounded-xl p-6">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+                  <span class="text-xs font-mono text-slate-300">ANALIZADOR ESPECTRAL</span>
+                </div>
+                <span id="statusIndicator" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">EN ESPERA</span>
+              </div>
+
+              <!-- Animated Equalizer Bars Container -->
+              <div class="my-8 flex items-end justify-center gap-1.5 h-36 px-4 bg-slate-950/60 rounded-xl border border-slate-900" id="eqContainer">
+                <!-- 20 Equalizer Bars dynamically populated or initialized -->
+              </div>
+            </div>
+
+            <!-- Controller Buttons -->
+            <div class="space-y-3">
+              <button id="playBtn" onclick="togglePlayback()" class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm tracking-wide transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-[0.99]">
+                <i id="playIcon" data-lucide="play" class="w-5 h-5 fill-slate-950"></i>
+                <span id="playText">Sintetizar & Reproducir</span>
+              </button>
+
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 px-1">
+                <span>Codificación: OGG / WAV</span>
+                <span id="generationTime">Tiempo: ~0.038s</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pillars / Capabilities Section -->
+  <section id="capacidades" class="py-24 bg-[#070B14]/80 border-y border-slate-800/80 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase font-mono tracking-widest text-cyan-400 font-semibold mb-2">Pilares Arquitecturales</h2>
+        <h3 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Capacidades del Ecosistema Clofovoz</h3>
+        <p class="text-slate-400 mt-3 text-base">Diseñado para soportar desde microservicios clínicos de foniatría hasta doblaje cinematográfico y avatares virtuales hiperrealistas.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Feature 1 -->
+        <div class="glass-card rounded-2xl p-6 relative flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-5 text-cyan-400">
+              <i data-lucide="sparkles" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-lg font-bold text-white mb-2">Clonación Zero-Shot</h4>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Replica cualquier timbre vocal con tan solo 3 segundos de muestra de audio de referencia. Conserva acento nativo y rasgos formánticos únicos.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-2 text-xs font-mono text-cyan-400">
+            <span>Latencia: 50ms</span>
+            <span>•</span>
+            <span>Zero-sample noise</span>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="glass-card rounded-2xl p-6 relative flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5 text-indigo-400">
+              <i data-lucide="globe" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-lg font-bold text-white mb-2">Doblaje Neuronal</h4>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Traducción políglota manteniendo la identidad original del locutor. Adaptación sincronizada de fonemas para video con ajuste labial de fase.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-2 text-xs font-mono text-indigo-400">
+            <span>32 Idiomas</span>
+            <span>•</span>
+            <span>Cross-lingual transfer</span>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="glass-card rounded-2xl p-6 relative flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-5 text-purple-400">
+              <i data-lucide="zap" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-lg font-bold text-white mb-2">Speech-to-Speech Realtime</h4>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Conversión de voz a voz en streaming con latencia inferior a 40ms, apta para llamadas telefónicas interactivas, videojuegos y asistentes conversacionales.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-2 text-xs font-mono text-purple-400">
+            <span>WebRTC / WebSockets</span>
+            <span>•</span>
+            <span>Full Duplex</span>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="glass-card rounded-2xl p-6 relative flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 text-emerald-400">
+              <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-lg font-bold text-white mb-2">Bioacústica & HealTech</h4>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Análisis espectral clínico para diagnóstico de anomalías en cuerdas vocales, biomarcadores de fatiga y asistencia en foniatría computacional.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-2 text-xs font-mono text-emerald-400">
+            <span>Bio-spectrogram</span>
+            <span>•</span>
+            <span>Clofovoz HealTech Ready</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Architecture & Code Snippet -->
+  <section id="tecnologia" class="py-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-xs font-mono text-cyan-300">
+            <span>SDK PARA DESARROLLADORES</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Integración de una línea para infraestructuras modernas
+          </h2>
+          <p class="text-slate-300 text-base leading-relaxed">
+            Consuma nuestras APIs REST y WebSockets directamente desde Cloudflare Workers, Node.js, Python o Go. Despliegue en el edge sin sobrecarga de dependencias pesadas.
+          </p>
+
+          <div class="space-y-4 pt-2">
+            <div class="flex items-start gap-3">
+              <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 mt-1">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-white">Streaming Chunked en Vivo</h4>
+                <p class="text-xs text-slate-400">Emita audio a medida que se sintetiza sin esperar la finalización del buffer completo.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 mt-1">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-white">Control Emocional Paramétrico</h4>
+                <p class="text-xs text-slate-400">Ajuste parámetros de empatía, seriedad, urgencia y brillo tonal en tiempo real.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Window -->
+        <div class="lg:col-span-6">
+          <div class="glass-panel rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl">
+            <!-- Header bar -->
+            <div class="bg-[#0b101c] px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                <span class="ml-2 text-xs font-mono text-slate-400">clofovoz-sdk.ts</span>
+              </div>
+              <button onclick="copySnippet()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="copyFeedback">Copiar</span>
+              </button>
+            </div>
+
+            <!-- Code block -->
+            <div class="p-5 bg-[#03060d] text-xs font-mono overflow-x-auto leading-relaxed text-slate-300">
+<pre><span class="text-purple-400">import</span> { ClofovozClient } <span class="text-purple-400">from</span> <span class="text-emerald-300">'@clofovoz/ai-sdk'</span>;
+
+<span class="text-slate-500">// Iniciar cliente neural optimizado para Cloudflare Edge</span>
+<span class="text-purple-400">const</span> client = <span class="text-purple-400">new</span> <span class="text-blue-300">ClofovozClient</span>({
+  apiKey: process.env.<span class="text-amber-300">CLOFOVOZ_API_KEY</span>,
+  region: <span class="text-emerald-300">'auto-latency-optimized'</span>
+});
+
+<span class="text-purple-400">const</span> stream = <span class="text-purple-400">await</span> client.voice.<span class="text-blue-300">synthesizeStream</span>({
+  voiceId: <span class="text-emerald-300">'clofo-core-latam'</span>,
+  text: <span class="text-emerald-300">'Diagnóstico completado con éxito, parámetros vocales estables.'</span>,
+  sampleRate: <span class="text-amber-300">48000</span>,
+  emotion: { tone: <span class="text-emerald-300">'clinical-empathic'</span>, intensity: <span class="text-amber-300">0.92</span> }
+});
+
+<span class="text-slate-500">// Flujo de chunks de audio binario para respuesta inmediata</span>
+stream.<span class="text-blue-300">pipeTo</span>(responseStream);</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Tiers -->
+  <section id="planes" class="py-24 bg-[#060912]/90 border-t border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase font-mono tracking-widest text-cyan-400 font-semibold mb-2">Planes de Inferencia</h2>
+        <h3 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Escalabilidad sin Servidores</h3>
+        <p class="text-slate-400 mt-2 text-base">Comienza gratis en Cloudflare y escala a millones de minutos de audio por segundo.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+        
+        <!-- Tier 1: Developer -->
+        <div class="glass-card rounded-2xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="text-sm font-bold text-slate-300 font-mono uppercase">Developer</div>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-white">$0</span>
+              <span class="text-xs text-slate-400 font-mono">/ mes</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">Ideal para pruebas, prototipos y desarrolladores independientes.</p>
+
+            <ul class="mt-8 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> 10,000 caracteres / mes
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> 3 Perfiles de voz estándar
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Audio en 24kHz
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> API REST estándar
+              </li>
+            </ul>
+          </div>
+
+          <button onclick="openModal()" class="w-full mt-8 py-3 rounded-xl glass-panel text-white text-xs font-bold hover:bg-slate-800 transition">
+            Comenzar Gratis
+          </button>
+        </div>
+
+        <!-- Tier 2: Pro (Featured) -->
+        <div class="glass-panel rounded-2xl p-8 flex flex-col justify-between border-2 border-cyan-500/80 relative shadow-2xl shadow-cyan-500/10">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 font-bold text-[10px] font-mono uppercase px-3 py-1 rounded-full shadow">
+            Recomendado
+          </div>
+
+          <div>
+            <div class="text-sm font-bold text-cyan-400 font-mono uppercase">Studio Pro</div>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-white">$49</span>
+              <span class="text-xs text-slate-400 font-mono">/ mes</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">Para productores de contenido, podcasts, y aplicaciones comerciales.</p>
+
+            <ul class="mt-8 space-y-3 text-xs text-slate-200">
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> 500,000 caracteres / mes
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Clonación instantánea (5 perfiles)
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Audio Master en 48kHz sin compresión
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Streaming WebSockets de baja latencia
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Soporte multilingüe simultáneo
+              </li>
+            </ul>
+          </div>
+
+          <button onclick="openModal()" class="w-full mt-8 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition shadow-lg shadow-cyan-500/25">
+            Iniciar Suscripción Pro
+          </button>
+        </div>
+
+        <!-- Tier 3: Enterprise / Clinical -->
+        <div class="glass-card rounded-2xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="text-sm font-bold text-slate-300 font-mono uppercase">Clinical & Enterprise</div>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-white">Custom</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">Para salud (Clofovoz HealTech), centros médicos y plataformas de telecomunicaciones.</p>
+
+            <ul class="mt-8 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Minutos y ancho de banda dedicados
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Módulo de Análisis Bioacústico Clínico
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> SLA 99.99% con edge dedicado
+              </li>
+              <li class="flex items-center gap-2.5">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Cumplimiento HIPAA y GDPR
+              </li>
+            </ul>
+          </div>
+
+          <button onclick="openModal()" class="w-full mt-8 py-3 rounded-xl glass-panel text-white text-xs font-bold hover:bg-slate-800 transition">
+            Hablar con un Especialista
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Network Footer Banner -->
+  <section class="py-16 relative">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="rounded-3xl p-8 md:p-12 bg-gradient-to-r from-blue-950/70 via-slate-900/90 to-cyan-950/70 border border-cyan-500/30 text-center relative overflow-hidden">
+        <div class="relative z-10 max-w-2xl mx-auto space-y-4">
+          <h3 class="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
+            Listo para construir sobre clofovoz.com
+          </h3>
+          <p class="text-sm text-slate-300">
+            Conecta tu flujo de trabajo en segundos con Cloudflare Pages y activa el poder de la fonética computacional.
+          </p>
+          <div class="pt-4">
+            <button onclick="openModal()" class="px-8 py-3.5 rounded-xl bg-white text-slate-950 font-extrabold text-sm hover:bg-cyan-100 transition shadow-xl">
+              Crear Cuenta y Obtener API Key
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-[#03050a] py-12 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+            <i data-lucide="audio-lines" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-200">CLOFOVOZ AI</div>
+            <div class="text-[10px] text-slate-500">© 2026 clofovoz.com • Todos los derechos reservados.</div>
+          </div>
+        </div>
+
+        <!-- Ecosystem Network Links -->
+        <div class="flex flex-wrap items-center justify-center gap-6 font-mono text-[11px] text-slate-400">
+          <span class="text-slate-600">Red Clofovoz:</span>
+          <span class="text-cyan-400 font-bold">clofovoz.com</span>
+          <span class="text-slate-400 hover:text-slate-200 cursor-pointer">clofovozhealtech.com</span>
+          <span class="text-slate-400 hover:text-slate-200 cursor-pointer">clofovozmusic.com</span>
+          <span class="text-slate-400 hover:text-slate-200 cursor-pointer">drjaimebra.com</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 text-slate-400 text-[11px] font-mono border border-slate-800">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Edge Online
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- Early Access / Contact Modal -->
+  <div id="contactModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-slate-700 p-6 md:p-8 relative transform scale-95 transition-transform duration-300 shadow-2xl" id="modalBox">
+      
+      <!-- Close Button -->
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="mb-6">
+        <div class="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-500/20 mb-2">
+          <i data-lucide="key" class="w-3.5 h-3.5"></i> Solicitud de Acceso Beta
+        </div>
+        <h3 class="text-2xl font-bold text-white">Despliega con Clofovoz AI</h3>
+        <p class="text-xs text-slate-400 mt-1">Recibe tus credenciales para la API y acceso al panel de control en clofovoz.com.</p>
+      </div>
+
+      <!-- Modal Form -->
+      <form id="accessForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-mono text-slate-300 mb-1">Nombre Completo</label>
+          <input type="text" required class="w-full bg-[#050812] border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition" placeholder="Dr. Jaime / Ingeniero">
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-300 mb-1">Correo Electrónico Corporativo</label>
+          <input type="email" required class="w-full bg-[#050812] border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition" placeholder="contacto@clofovoz.com">
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-300 mb-1">Ecosistema o Caso de Uso</label>
+          <select class="w-full bg-[#050812] border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 transition">
+            <option value="clofovoz">Clofovoz AI (Síntesis & API general)</option>
+            <option value="healtech">Clofovoz HealTech (Bioacústica médica)</option>
+            <option value="music">Clofovoz Music (Generación sonora)</option>
+            <option value="drjaimebra">drjaimebra.com (Práctica médica / Foniatría)</option>
+          </select>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm tracking-wide transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2">
+            <span>Obtener Clave de Acceso</span>
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message (Hidden by default) -->
+      <div id="successMsg" class="hidden text-center py-8 space-y-3">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/30">
+          <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <h4 class="text-lg font-bold text-white">Solicitud Recibida</h4>
+        <p class="text-xs text-slate-400 max-w-xs mx-auto">Te hemos asignado el token temporal. Revisa tu bandeja de entrada para verificar la clave.</p>
+        <button onclick="closeModal()" class="mt-4 px-6 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs hover:bg-slate-700 transition">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Mobile Navigation Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    function toggleMobileMenu() {
+      mobileMenu.classList.toggle('hidden');
+    }
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Modal Handlers
+    const modal = document.getElementById('contactModal');
+    const modalBox = document.getElementById('modalBox');
+    function openModal() {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modalBox.classList.remove('scale-95');
+      modalBox.classList.add('scale-100');
+    }
+    function closeModal() {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modalBox.classList.remove('scale-100');
+      modalBox.classList.add('scale-95');
+      // Reset form view after delay
+      setTimeout(() => {
+        document.getElementById('accessForm').classList.remove('hidden');
+        document.getElementById('successMsg').classList.add('hidden');
+      }, 300);
+    }
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      document.getElementById('accessForm').classList.add('hidden');
+      document.getElementById('successMsg').classList.remove('hidden');
+    }
+
+    // Copy Code Snippet Handler
+    function copySnippet() {
+      const code = `import { ClofovozClient } from '@clofovoz/ai-sdk';
+const client = new ClofovozClient({ apiKey: 'TU_API_KEY' });
+const audio = await client.voice.synthesizeStream({ text: 'Hola mundo' });`;
+      
+      const el = document.createElement('textarea');
+      el.value = code;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      const feedback = document.getElementById('copyFeedback');
+      feedback.textContent = '¡Copiado!';
+      setTimeout(() => { feedback.textContent = 'Copiar'; }, 2000);
+    }
+
+    // ----------------------------------------------------
+    // HERO OSCILLOSCOPE CANVAS (Continuous Animated Waves)
+    // ----------------------------------------------------
+    const heroCanvas = document.getElementById('heroCanvas');
+    const ctx = heroCanvas.getContext('2d');
+    let heroAnimationId;
+
+    function resizeHeroCanvas() {
+      heroCanvas.width = heroCanvas.parentElement.clientWidth;
+      heroCanvas.height = heroCanvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeHeroCanvas);
+    resizeHeroCanvas();
+
+    let phase = 0;
+    function renderHeroWave() {
+      ctx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+      const width = heroCanvas.width;
+      const height = heroCanvas.height;
+      const midY = height / 2;
+
+      // Draw 3 layers of harmonic waves
+      const waves = [
+        { color: 'rgba(6, 182, 212, 0.8)', speed: 0.04, amp: 38, freq: 0.012 },
+        { color: 'rgba(99, 102, 241, 0.5)', speed: 0.03, amp: 24, freq: 0.018 },
+        { color: 'rgba(16, 185, 129, 0.4)', speed: 0.02, amp: 16, freq: 0.008 }
+      ];
+
+      waves.forEach(w => {
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = w.color;
+
+        for (let x = 0; x < width; x++) {
+          const y = midY + Math.sin(x * w.freq + phase * w.speed) * w.amp * Math.sin(x / width * Math.PI);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+
+      phase += 1;
+      heroAnimationId = requestAnimationFrame(renderHeroWave);
+    }
+    renderHeroWave();
+
+    // ----------------------------------------------------
+    // INTERACTIVE VOICE SIMULATOR & AUDIO SYNTHESIS
+    // ----------------------------------------------------
+    const eqContainer = document.getElementById('eqContainer');
+    const numBars = 24;
+    const bars = [];
+
+    // Build the visualizer bars
+    for (let i = 0; i < numBars; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'eq-bar flex-1 bg-cyan-500/30 rounded-t-sm';
+      bar.style.height = '6px';
+      eqContainer.appendChild(bar);
+      bars.push(bar);
+    }
+
+    let isPlaying = false;
+    let synthInterval;
+    let selectedVoiceId = 'clofo-core';
+    let pitch = 1.0;
+    let speed = 1.0;
+
+    // Browser Speech Synthesis Setup (Fallback & Simulator)
+    const synth = window.speechSynthesis;
+
+    function selectVoice(id, btnElement) {
+      selectedVoiceId = id;
+      document.querySelectorAll('.voice-btn').forEach(b => {
+        b.classList.remove('active', 'border-cyan-500', 'bg-cyan-950/40');
+        b.classList.add('border-slate-800', 'bg-slate-900/60');
+      });
+      btnElement.classList.add('active', 'border-cyan-500', 'bg-cyan-950/40');
+      btnElement.classList.remove('border-slate-800', 'bg-slate-900/60');
+    }
+
+    function updatePitch(val) {
+      pitch = parseFloat(val);
+      document.getElementById('pitchVal').innerText = val + 'x';
+    }
+
+    function updateSpeed(val) {
+      speed = parseFloat(val);
+      document.getElementById('speedVal').innerText = val + 'x';
+    }
+
+    const samplePrompts = [
+      "Bienvenido a Clofovoz AI. Nuestra arquitectura neuronal recrea la inflexión emotiva en menos de cuarenta milisegundos.",
+      "Análisis bioacústico iniciado: Frecuencia fundamental en ciento veinticinco hercios, resonancia formántica equilibrada.",
+      "Clofovoz HealTech detecta micro-variaciones armónicas en la fonación del paciente con alta precisión diagnóstica.",
+      "Traducción multilingüe en streaming completada. Sincronización labial activa para emisión internacional."
+    ];
+
+    function setRandomPrompt() {
+      const randomText = samplePrompts[Math.floor(Math.random() * samplePrompts.length)];
+      document.getElementById('demoText').value = randomText;
+    }
+
+    // Toggle Play / Stop Synthesis
+    function togglePlayback() {
+      if (isPlaying) {
+        stopPlayback();
+      } else {
+        startPlayback();
+      }
+    }
+
+    function startPlayback() {
+      const text = document.getElementById('demoText').value.trim();
+      if (!text) return;
+
+      isPlaying = true;
+      updateUIPlayback(true);
+
+      // Animate Equalizer Bars dynamically
+      synthInterval = setInterval(() => {
+        bars.forEach((bar, idx) => {
+          // Dynamic randomized harmonic height simulation
+          const variance = Math.sin(Date.now() / 150 + idx) * 0.5 + 0.5;
+          const randomH = Math.floor(Math.random() * 85 + 15 * variance);
+          bar.style.height = `${randomH}%`;
+          bar.style.backgroundColor = idx % 2 === 0 ? '#38bdf8' : '#818cf8';
+        });
+      }, 70);
+
+      // Speech Synthesis Audio Engine
+      if (synth) {
+        synth.cancel(); // clear queue
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = speed;
+        utterance.pitch = pitch;
+        utterance.lang = 'es-ES';
+
+        utterance.onend = () => {
+          stopPlayback();
+        };
+        utterance.onerror = () => {
+          stopPlayback();
+        };
+
+        synth.speak(utterance);
+      } else {
+        // Fallback simulation timer if speech synthesis is disabled
+        setTimeout(stopPlayback, 5000);
+      }
+    }
+
+    function stopPlayback() {
+      isPlaying = false;
+      if (synth) synth.cancel();
+      clearInterval(synthInterval);
+      bars.forEach(bar => {
+        bar.style.height = '6px';
+        bar.style.backgroundColor = 'rgba(6, 182, 212, 0.3)';
+      });
+      updateUIPlayback(false);
+    }
+
+    function updateUIPlayback(playing) {
+      const playBtn = document.getElementById('playBtn');
+      const playIcon = document.getElementById('playIcon');
+      const playText = document.getElementById('playText');
+      const statusIndicator = document.getElementById('statusIndicator');
+
+      if (playing) {
+        playText.textContent = 'Detener Simulación';
+        playIcon.setAttribute('data-lucide', 'square');
+        statusIndicator.textContent = 'TRANSMITIENDO';
+        statusIndicator.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 animate-pulse';
+      } else {
+        playText.textContent = 'Sintetizar & Reproducir';
+        playIcon.setAttribute('data-lucide', 'play');
+        statusIndicator.textContent = 'EN ESPERA';
+        statusIndicator.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+      }
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
